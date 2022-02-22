@@ -19,7 +19,7 @@ actor_learning_rate = 3e-4
 critic_learning_rate = 3e-4
 batch_size = 15
 discount_factor = 0.99
-eps = 0.2
+eps = 0.3
 epoch = 1000
 
 ## Env Dataset
@@ -42,7 +42,7 @@ list_total_reward = []
 
 
 ## 전에 사용했던 모델 있는 곳
-PATH = 'stock_model_best.pth'
+PATH = 'stock_model.pth'
 ## 전에 사용했던 모델 가져오기
 load = True
 if load == True:

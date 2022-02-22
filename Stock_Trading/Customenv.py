@@ -69,8 +69,8 @@ class stock_env(gym.Env) :
     def calculate_reward(self):
         ## TODO : Tune the reward
         sum = len(self.inventory) * self.close[self.pos]
-        # print("Calculating Reward : ", self.pos, sum)
-        return (sum + self.cur_money - self.init_money) / self.init_money
+        # print("Calculating Reward :  ", self.pos, sum)
+        return 10 * (sum + self.cur_money - self.init_money) / self.init_money
 
     def step(self,action):
 
