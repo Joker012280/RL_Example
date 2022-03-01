@@ -40,7 +40,7 @@ class Model(nn.Module):
             mask = torch.FloatTensor([mask])
             probs = probs * mask
 
-        print("Action Probs : ",probs)
+        # print("Action Probs : ",probs)
         dist = Categorical(probs)
         action = dist.sample()
         action_prob = dist.log_prob(action)
@@ -89,7 +89,7 @@ class PPO(nn.Module):
             surr1 = ratio * advantages
             surr2 = torch.clamp(ratio,1-self.eps,1+self.eps) * advantages
             loss = - torch.min(surr1,surr2) + 0.5*self.mse(state_value,reward) - 0.2*entropy
-            print("Total Loss : ",loss.mean().item())
+            # print("Total Loss : ",loss.mean().item())
             self.optimizer.zero_grad()
             loss.mean().backward()
             self.optimizer.step()

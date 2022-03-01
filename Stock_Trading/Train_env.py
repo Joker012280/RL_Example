@@ -20,7 +20,8 @@ critic_learning_rate = 3e-4
 batch_size = 15
 discount_factor = 0.99
 eps = 0.3
-epoch = 1000
+epoch = 10000
+print_interval = 25
 
 ## Env Dataset
 dataset = pd.read_csv("Dataset2.csv")
@@ -42,8 +43,9 @@ list_total_reward = []
 
 
 ## 전에 사용했던 모델 있는 곳
-PATH = 'stock_model.pth'
-## 전에 사용했던 모델 가져오기
+PATH = 'stock_model_best.pth'
+## 전에 사용했던 모델 가져오기+
+
 load = True
 if load == True:
     temp = torch.load(PATH)
@@ -79,14 +81,15 @@ for num_episode in range(epoch) :
             break
 
     ## 결과값 프린트
-    print("# of episode : {}, average score : {:.1f}".format(num_episode,total_reward))
-    list_total_reward.append(total_reward)
-    if best_reward < total_reward :
-        best_reward = total_reward
-        torch.save({
-            'model_state_dict' : agent.state_dict(),
-        },'stock_model_best.pth')
-    total_reward = 0.0
+    if num_episode % print_interval == 0 and num_episode != 0:
+        print("# of episode : {}, average score : {:.1f}".format(num_episode,total_reward/print_interval))
+        list_total_reward.append(total_reward/print_interval)
+        if best_reward < total_reward :
+            best_reward = total_reward
+            torch.save({
+                'model_state_dict' : agent.state_dict(),
+            },'stock_model_best.pth')
+        total_reward = 0.0
 
 ## Saving Final Result
 torch.save({
