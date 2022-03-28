@@ -21,7 +21,7 @@ class critic(nn.Module) :
         super(critic,self).__init__()
         self.fc1 = nn.Linear(input_size,hidden)
         self.fc2 = nn.Linear(hidden,hidden)
-        self.fc3 = nn.Linear(hidden,2)
+        self.fc3 = nn.Linear(hidden,1)
 
     def forward(self,x,y):
         x = F.relu(self.fc1(torch.cat((x,y),dim =1)))

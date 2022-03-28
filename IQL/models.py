@@ -29,3 +29,16 @@ class critic(nn.Module) :
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
         return x
+
+class value(nn.Module) :
+    def __init__(self,input_size,hidden):
+        super(value,self).__init__()
+        self.fc1 = nn.Linear(input_size,hidden)
+        self.fc2 = nn.Linear(hidden,hidden)
+        self.fc3 = nn.Linear(hidden,1)
+
+    def forward(self,x):
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        return x
