@@ -3,7 +3,7 @@ import torch
 import numpy as np
 from matplotlib import pyplot as plt
 from IPython.display import clear_output
-import iql
+import cql
 import os
 import sys
 
@@ -21,9 +21,7 @@ hidden = 128
 
 ## Train
 total_reward = 0
-expectile = 0.5
-temperature = 3.0
-offline_agent = iql.IQL(state_dim,hidden,action_dim,expectile=expectile,temperature= temperature)
+offline_agent = cql.CQL(state_dim,hidden,action_dim)
 list_total_reward = []
 
 offline_agent.memory.load_data()
@@ -33,15 +31,14 @@ print("Data size : ",offline_agent.memory.size())
 print("Start Training Offline Agent")
 max_offline_train_num = 100000
 print_interval = 2500
-iql_path = "IQL_3_0.8.pth"
+cql_path = "Cql.pth"
+target_update_interval = 1000
 load = True
-
 if load == True :
-    temp = torch.load(iql_path)
+    temp = torch.load(cql_path)
     offline_agent.load_state_dict(temp['model_state_dict'])
     offline_agent.eval()
     print("End Loading")
-
 
 def testing():
     max_episode_num = 20
@@ -54,8 +51,7 @@ def testing():
         while not done:
             global_step += 1
             state = torch.FloatTensor(state)
-            with torch.no_grad():
-                action = offline_agent.actor_network(state)
+            action = offline_agent.actor_network(state)
             action = action.sample()
 
             ## Action 값이 범위를 넘어서지 않도록 설정
@@ -74,13 +70,13 @@ def testing():
 
 
 for train_num in range(max_offline_train_num):
-    critic_loss_1,critic_loss_2,actor_loss,_ = offline_agent.train_net()
-    # writer.add_scalar("Critic Loss 1",critic_loss_1,train_num)
-    # writer.add_scalar("Critic Loss 2", critic_loss_2, train_num)
-    # writer.add_scalar("Actor Loss",actor_loss,train_num)
+    critic_loss,actor_loss = offline_agent.train_net()
+    writer.add_scalar("Critic Loss",critic_loss,train_num)
+    writer.add_scalar("Actor Loss",actor_loss,train_num)
+    if train_num % target_update_interval == 0 and train_num != 0:
+        offline_agent.load_dict()
     ## 결과값 프린트
     if train_num % print_interval == 0 and train_num != 0:
-        clear_output()
         print("# of train num : {}".format(train_num))
         average_reward = testing()
         print("Testing While Training : {} / Average Reward : {}".format(train_num,average_reward))
@@ -88,9 +84,6 @@ for train_num in range(max_offline_train_num):
 ## 모델 저장하기 !
 torch.save({
     'model_state_dict': offline_agent.state_dict(),
-}, 'IQL_3_'+str(expectile)+'.pth')
+}, 'Cql.pth')
 
 print("End Training!")
-
-
-

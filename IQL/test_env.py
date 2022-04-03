@@ -9,6 +9,7 @@ import sys
 
 path = (os.path.abspath(os.path.join((os.path.dirname(__file__)),'..')))
 sys.path.append(os.path.join(path,'TD3'))
+os.environ['KMP_DUPLICATE_LIB_OK']='True'
 import TD3
 
 
@@ -31,7 +32,7 @@ def plot_durations(name):
 
 
 ## Environment
-env = gym.make('Pendulum-v1')
+env = gym.make('Pendulum-v0')
 ## Action이 연속적이라 env.action_space.n을 사용하지않음.
 state_dim = env.observation_space.shape[0]
 action_dim = env.action_space.shape[0]
@@ -51,7 +52,7 @@ list_total_reward = []
 
 ## 전에 사용했던 모델 있는 곳
 td3_path = "Td3.pth"
-iql_path = "IQL_1_0.5.pth"
+iql_path = "IQL_3_0.5.pth"
 ## 전에 사용했던 모델 가져오기
 load = True
 if load == True :

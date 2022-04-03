@@ -12,12 +12,11 @@ class Replay_buffer(object):
 
 
 
-
     def push(self, data):
         if self.capacity is not None :
-            if len(self.memory) == self.capacity:
+            if len(self.memory) == self.max_size:
                 self.memory[int(self.position)] = data
-                self.position = (self.position + 1) % self.capacity
+                self.position = (self.position + 1) % self.max_size
             else:
                 self.memory.append(data)
                 self.buffer_size += 1

@@ -3,16 +3,15 @@ import torch
 import numpy as np
 from matplotlib import pyplot as plt
 from IPython.display import clear_output
-import iql
+import cql
 import os
 import sys
 
-from torch.utils.tensorboard import SummaryWriter
-writer = SummaryWriter()
-os.environ['KMP_DUPLICATE_LIB_OK']='True'
 path = (os.path.abspath(os.path.join((os.path.dirname(__file__)),'..')))
 sys.path.append(os.path.join(path,'TD3'))
 import TD3
+
+
 
 def plot_durations(name):
     plt.figure(2)
@@ -41,15 +40,15 @@ print_interval = 250
 total_reward = 0
 online_agent = TD3.TD3(state_dim,hidden,action_dim)
 noise_generator = TD3.Noisegenerator(0,0.1)
-offline_agent = iql.IQL(state_dim,hidden,action_dim)
+offline_agent = cql.CQL(state_dim,hidden,action_dim)
 list_total_reward = []
 
 ## 전에 사용했던 모델 있는 곳
-iql_path = "IQL.pth"
+td3_path = "Td3.pth"
 ## 전에 사용했던 모델 가져오기
 load = False
 if load == True :
-    temp = torch.load(iql_path)
+    temp = torch.load(td3_path)
     online_agent.load_state_dict(temp['model_state_dict'])
     online_agent.eval()
     print("End Loading")
@@ -66,6 +65,7 @@ for num_episode in range(max_episode_num):
         action = online_agent.actor_network(state).item()
         ## noise 추가
         action += noise_generator.generate()
+
         ## Action 값이 범위를 넘어서지 않도록 설정
         action = max(min(action, 2.0), -2.0)
 
@@ -74,7 +74,7 @@ for num_episode in range(max_episode_num):
         online_agent.memory.push((state, torch.FloatTensor([action]), torch.FloatTensor([reward]),\
                            torch.FloatTensor(np.array(next_state)), torch.FloatTensor([done])))
         offline_agent.memory.push((state, torch.FloatTensor([action]), torch.FloatTensor([reward]), \
-                                  torch.FloatTensor(np.array(next_state)), torch.FloatTensor([done])))
+                                   torch.FloatTensor(np.array(next_state)), torch.FloatTensor([done])))
 
         state = next_state
 
@@ -85,7 +85,6 @@ for num_episode in range(max_episode_num):
     ## Memory size가 커지고 나서 학습시작
     if online_agent.memory.size() > 1000:
         online_agent.train_net()
-
     ## 결과값 프린트
     if num_episode % print_interval == 0 and num_episode != 0:
         clear_output()
@@ -102,7 +101,7 @@ print("Finish Data Saving")
 ## 모델 저장하기 !
 torch.save({
     'model_state_dict': online_agent.state_dict(),
-}, 'IQL_Online.pth')
+}, 'Td3.pth')
 
 clear_output()
 
