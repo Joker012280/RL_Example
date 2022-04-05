@@ -25,7 +25,7 @@ def plot_durations(name):
 
 
 ## Environment
-env = gym.make('Pendulum-v0')
+env = gym.make('Pendulum-v1')
 ## Action이 연속적이라 env.action_space.n을 사용하지않음.
 state_dim = env.observation_space.shape[0]
 action_dim = env.action_space.shape[0]
@@ -53,6 +53,8 @@ if load == True :
     online_agent.eval()
     print("End Loading")
 
+save = False
+
 ## Start Training For TD3 Agent(Stacking Buffer)
 for num_episode in range(max_episode_num):
     state = env.reset()
@@ -73,7 +75,8 @@ for num_episode in range(max_episode_num):
         ## Replay Buffer의 저장
         online_agent.memory.push((state, torch.FloatTensor([action]), torch.FloatTensor([reward]),\
                            torch.FloatTensor(np.array(next_state)), torch.FloatTensor([done])))
-        offline_agent.memory.push((state, torch.FloatTensor([action]), torch.FloatTensor([reward]), \
+        if save == True :
+            offline_agent.memory.push((state, torch.FloatTensor([action]), torch.FloatTensor([reward]), \
                                    torch.FloatTensor(np.array(next_state)), torch.FloatTensor([done])))
 
         state = next_state
@@ -92,6 +95,8 @@ for num_episode in range(max_episode_num):
         print("# of episode : {}, average score : {:.1f}".format(num_episode, \
                                                                  total_reward / print_interval))
         list_total_reward.append(total_reward / print_interval)
+        if (total_reward / print_interval) > -1200 :
+            save = True
         total_reward = 0.0
 
 plot_durations("Online_Agent.png")
@@ -107,4 +112,3 @@ clear_output()
 
 print("End Training Online Agent")
 
-print("End Training!")

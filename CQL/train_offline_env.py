@@ -12,7 +12,7 @@ writer = SummaryWriter()
 
 
 ## Environment
-env = gym.make('Pendulum-v0')
+env = gym.make('Pendulum-v1')
 ## Action이 연속적이라 env.action_space.n을 사용하지않음.
 state_dim = env.observation_space.shape[0]
 action_dim = env.action_space.shape[0]
@@ -33,7 +33,7 @@ max_offline_train_num = 100000
 print_interval = 2500
 cql_path = "Cql.pth"
 target_update_interval = 1000
-load = True
+load = False
 if load == True :
     temp = torch.load(cql_path)
     offline_agent.load_state_dict(temp['model_state_dict'])

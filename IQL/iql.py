@@ -33,7 +33,7 @@ class IQL(nn.Module):
         self.temperature = 3.0 if temperature is None else temperature
         self.epoch = 1
         self.discount_factor = 0.99
-        self.batch_size = 256
+        self.batch_size = 128
         self.memory = Buffer.Replay_buffer(self.batch_size)
 
 

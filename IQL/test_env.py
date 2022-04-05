@@ -11,15 +11,18 @@ path = (os.path.abspath(os.path.join((os.path.dirname(__file__)),'..')))
 sys.path.append(os.path.join(path,'TD3'))
 os.environ['KMP_DUPLICATE_LIB_OK']='True'
 import TD3
+from torch.utils.tensorboard import SummaryWriter
+writer = SummaryWriter()
 
 
 
 
-def plot_durations(name):
+
+def plot_durations(name,list1,list2):
     plt.figure(2)
     #plt.clf()
-    durations_t = torch.FloatTensor(list_total_reward)
-    durations_t_off = torch.FloatTensor(list_total_off_reward)
+    durations_t = torch.FloatTensor(list1)
+    durations_t_off = torch.FloatTensor(list2)
     plt.title('Testing')
     plt.xlabel('num of episode')
     plt.ylabel('reward')
@@ -32,7 +35,7 @@ def plot_durations(name):
 
 
 ## Environment
-env = gym.make('Pendulum-v0')
+env = gym.make('Pendulum-v1')
 ## Action이 연속적이라 env.action_space.n을 사용하지않음.
 state_dim = env.observation_space.shape[0]
 action_dim = env.action_space.shape[0]
@@ -48,7 +51,6 @@ total_reward = 0
 online_agent = TD3.TD3(state_dim,hidden,action_dim)
 noise_generator = TD3.Noisegenerator(0,0.1)
 offline_agent = iql.IQL(state_dim,hidden,action_dim)
-list_total_reward = []
 
 ## 전에 사용했던 모델 있는 곳
 td3_path = "Td3.pth"
@@ -66,6 +68,7 @@ if load == True :
 
 # First Test for TD3
 print("TD3 Testing")
+list_total_reward = []
 for num_episode in range(max_episode_num):
     state = env.reset()
     global_step = 0
@@ -81,9 +84,10 @@ for num_episode in range(max_episode_num):
         ## Action 값이 범위를 넘어서지 않도록 설정
         action = max(min(action, 2.0), -2.0)
 
+
+
         next_state, reward, done, _ = env.step([action])
         ## Replay Buffer의 저장
-
         state = next_state
 
         total_reward += reward
@@ -105,6 +109,7 @@ for num_episode in range(max_episode_num):
 # Second Test for Crr
 print("IQL Testing")
 list_total_off_reward = []
+
 for num_episode in range(max_episode_num):
     state = env.reset()
     global_step = 0
@@ -118,6 +123,7 @@ for num_episode in range(max_episode_num):
 
         ## Action 값이 범위를 넘어서지 않도록 설정
         action = torch.clamp(action,min=-2,max=2)
+
 
         next_state, reward, done, _ = env.step(action.numpy())
         ## Replay Buffer의 저장
@@ -135,4 +141,25 @@ for num_episode in range(max_episode_num):
         list_total_off_reward.append(total_reward / print_interval)
         total_reward = 0.0
 
-plot_durations("Testing_Agent_" +str(iql_path)+".png")
+plot_durations("Testing_Agent_" +str(iql_path)+".png",list_total_reward,list_total_off_reward)
+
+
+# Checking Q values
+list_q_on = []
+list_q_off = []
+ss = []
+aa = []
+for i in range(len(offline_agent.memory.memory)) :
+    s,a,_,_,_ = offline_agent.memory.memory[i]
+    ss.append(s)
+    aa.append(a)
+    if i != 0 and i % 1 ==0 :
+        st= torch.tensor(ss)
+        at = torch.tensor(aa)
+        q = torch.mean(online_agent.critic1_network(st,at),online_agent.critic2_network(st,at))
+        writer.add_scalar("Online Q",q,i)
+        q = torch.mean(offline_agent.critic_network_1(st,at),offline_agent.critic_network_2(st,at))
+        writer.add_scalar("Offline Q", q, i)
+        ss = []
+        aa = []
+

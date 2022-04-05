@@ -12,7 +12,7 @@ writer = SummaryWriter()
 
 
 ## Environment
-env = gym.make('Pendulum-v0')
+env = gym.make('Pendulum-v1')
 ## Action이 연속적이라 env.action_space.n을 사용하지않음.
 state_dim = env.observation_space.shape[0]
 action_dim = env.action_space.shape[0]
@@ -31,9 +31,9 @@ print("Finished Data Loading")
 print("Data size : ",offline_agent.memory.size())
 
 print("Start Training Offline Agent")
-max_offline_train_num = 100000
+max_offline_train_num = 300000
 print_interval = 2500
-iql_path = "IQL_3_0.8.pth"
+iql_path = "IQL_3_0.5.pth"
 load = True
 
 if load == True :
