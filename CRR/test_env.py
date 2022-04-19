@@ -44,20 +44,20 @@ print_interval = 10
 
 ## Train
 total_reward = 0
-online_agent = TD3.TD3(state_dim,hidden,action_dim)
-noise_generator = TD3.Noisegenerator(0,0.1)
+# online_agent = TD3.TD3(state_dim,hidden,action_dim)
+# noise_generator = TD3.Noisegenerator(0,0.1)
 offline_agent = crr.CRR(state_dim,hidden,action_dim)
 list_total_reward = []
 
 ## 전에 사용했던 모델 있는 곳
 td3_path = "Td3.pth"
-crr_path = "Crr.pth"
+crr_path = "Crr_check.pth"
 ## 전에 사용했던 모델 가져오기
 load = True
 if load == True :
-    temp = torch.load(td3_path)
-    online_agent.load_state_dict(temp['model_state_dict'])
-    online_agent.eval()
+    # temp = torch.load(td3_path)
+    # online_agent.load_state_dict(temp['model_state_dict'])
+    # online_agent.eval()
     temp = torch.load(crr_path)
     offline_agent.load_state_dict(temp['model_state_dict'])
     offline_agent.eval()
@@ -65,40 +65,40 @@ if load == True :
 
 # First Test for TD3
 print("TD3 Testing")
-for num_episode in range(max_episode_num):
-    state = env.reset()
-    global_step = 0
-    done = False
-    reward = 0
-    while not done:
-        global_step += 1
-        state = torch.from_numpy(state).float()
-        action = online_agent.actor_network(state).item()
-        ## noise 추가
-        action += noise_generator.generate()
-
-        ## Action 값이 범위를 넘어서지 않도록 설정
-        action = max(min(action, 2.0), -2.0)
-
-        next_state, reward, done, _ = env.step([action])
-        ## Replay Buffer의 저장
-
-        state = next_state
-
-        total_reward += reward
-
-        if done:
-            break
-    ## 결과값 프린트
-    if num_episode % print_interval == 0 and num_episode != 0:
-        clear_output()
-
-        print("# of episode : {}, average score : {:.1f}".format(num_episode, \
-                                                                 total_reward / print_interval))
-        list_total_reward.append(total_reward / print_interval)
-        total_reward = 0.0
-
-
+# for num_episode in range(max_episode_num):
+#     state = env.reset()
+#     global_step = 0
+#     done = False
+#     reward = 0
+#     while not done:
+#         global_step += 1
+#         state = torch.from_numpy(state).float()
+#         action = online_agent.actor_network(state).item()
+#         ## noise 추가
+#         action += noise_generator.generate()
+#
+#         ## Action 값이 범위를 넘어서지 않도록 설정
+#         action = max(min(action, 2.0), -2.0)
+#
+#         next_state, reward, done, _ = env.step([action])
+#         ## Replay Buffer의 저장
+#
+#         state = next_state
+#
+#         total_reward += reward
+#
+#         if done:
+#             break
+#     ## 결과값 프린트
+#     if num_episode % print_interval == 0 and num_episode != 0:
+#         clear_output()
+#
+#         print("# of episode : {}, average score : {:.1f}".format(num_episode, \
+#                                                                  total_reward / print_interval))
+#         list_total_reward.append(total_reward / print_interval)
+#         total_reward = 0.0
+#
+#
 
 
 # Second Test for Crr

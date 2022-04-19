@@ -29,7 +29,7 @@ print("Finished Data Loading")
 print("Data size : ",offline_agent.memory.size())
 
 print("Start Training Offline Agent")
-max_offline_train_num = 100000
+max_offline_train_num = 300000
 print_interval = 2500
 cql_path = "Cql.pth"
 target_update_interval = 1000
@@ -70,8 +70,9 @@ def testing():
 
 
 for train_num in range(max_offline_train_num):
-    critic_loss,actor_loss = offline_agent.train_net()
-    writer.add_scalar("Critic Loss",critic_loss,train_num)
+    critic_loss_1,critic_loss_2,actor_loss = offline_agent.train_net()
+    writer.add_scalar("Critic Loss_1",critic_loss_1,train_num)
+    writer.add_scalar("Critic Loss_2", critic_loss_2, train_num)
     writer.add_scalar("Actor Loss",actor_loss,train_num)
     if train_num % target_update_interval == 0 and train_num != 0:
         offline_agent.load_dict()

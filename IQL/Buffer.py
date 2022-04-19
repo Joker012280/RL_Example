@@ -33,11 +33,11 @@ class Replay_buffer(object):
         self.position = 0
         self.buffer_size = 0
 
-    def save_data(self):
-        with open("data.pickle","wb") as fw:
+    def save_data(self,name):
+        with open(str(name)+".pickle","wb") as fw:
             pickle.dump(self.memory,fw)
-    def load_data(self):
-        with open("data.pickle",'rb') as f:
+    def load_data(self,name):
+        with open(str(name)+".pickle",'rb') as f:
             self.memory = pickle.load(f)
 
     def size(self):

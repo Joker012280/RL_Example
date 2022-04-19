@@ -46,12 +46,6 @@ class actor_discrete(nn.Module):
 
         return x
 
-    def evaluate(self, x):
-        logit = self.forward(x)
-        dist = Categorical(logits=logit)
-        action = dist.sample()
-        return action, dist
-
 
 class critic(nn.Module):
     def __init__(self, input_size, hidden, seed=1):
@@ -69,12 +63,12 @@ class critic(nn.Module):
 
 
 class critic_discrete(nn.Module):
-    def __init__(self, input_size, hidden,action_dim, seed=1):
+    def __init__(self, input_size, hidden, seed=1):
         super(critic_discrete, self).__init__()
         torch.manual_seed(seed)
         self.fc1 = nn.Linear(input_size, hidden)
         self.fc2 = nn.Linear(hidden, hidden)
-        self.fc3 = nn.Linear(hidden, action_dim)
+        self.fc3 = nn.Linear(hidden, 1)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))

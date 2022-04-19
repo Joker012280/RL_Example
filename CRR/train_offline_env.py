@@ -9,7 +9,8 @@ import sys
 
 from torch.utils.tensorboard import SummaryWriter
 writer = SummaryWriter()
-
+path = (os.path.abspath(os.path.join((os.path.dirname(__file__)),'..')))
+sys.path.append(os.path.join(path,'pendulum_data'))
 
 ## Environment
 env = gym.make('Pendulum-v1')
@@ -24,16 +25,16 @@ total_reward = 0
 offline_agent = crr.CRR(state_dim,hidden,action_dim)
 list_total_reward = []
 
-offline_agent.memory.load_data()
+offline_agent.memory.load_data("C:/Users/user/Desktop/RL_Example/pendulum_data/mid-expert")
 print("Finished Data Loading")
 print("Data size : ",offline_agent.memory.size())
 
 print("Start Training Offline Agent")
-max_offline_train_num = 100000
+max_offline_train_num = 300000
 print_interval = 2500
 crr_path = "Crr.pth"
 target_update_interval = 1000
-load = True
+load = False
 if load == True :
     temp = torch.load(crr_path)
     offline_agent.load_state_dict(temp['model_state_dict'])
@@ -54,6 +55,6 @@ for train_num in range(max_offline_train_num):
 ## 모델 저장하기 !
 torch.save({
     'model_state_dict': offline_agent.state_dict(),
-}, 'Crr.pth')
+}, 'Crr_check.pth')
 
 print("End Training!")

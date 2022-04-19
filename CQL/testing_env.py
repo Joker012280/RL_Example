@@ -13,6 +13,8 @@ os.environ['KMP_DUPLICATE_LIB_OK']='True'
 import TD3
 
 
+from torch.utils.tensorboard import SummaryWriter
+writer = SummaryWriter()
 
 
 def plot_durations(name):
@@ -136,3 +138,88 @@ for num_episode in range(max_episode_num):
         total_reward = 0.0
 
 plot_durations("Testing_Agent_" +str(cql_path)+".png")
+
+
+# Checking Q values
+
+print(len(offline_agent.memory.memory))
+online_q = []
+offline_q = []
+offline_adv = []
+with torch.no_grad() :
+    for i in range(len(offline_agent.memory.memory)) :
+        st,at,_,_,_ = offline_agent.memory.memory[i]
+
+        if i != 0 and i % 1 ==0 :
+            st = st.unsqueeze(0)
+            at = at.unsqueeze(0)
+            q,q1 = online_agent.critic1_network(st,at).item(),online_agent.critic2_network(st,at).item()
+            min_q = min(q, q1)
+            print(min_q)
+            online_q.append(float(min_q))
+            # writer.add_scalar("OffT/Online Q1",min_q,i)
+            q2,q3 = offline_agent.critic_network_1(st,at),offline_agent.critic_network_2(st,at)
+            min_q2 = min(q2, q3)
+            offline_q.append(float(min_q2))
+            # writer.add_scalar("OffT/Offline Q1", min_q2, i)
+
+            v = offline_agent.value_network(st)
+            adv = min_q2 -v
+            offline_adv.append(float(adv))
+            # writer.add_scalar("OffT/Q-V",adv,i )
+            # writer.add_scalar("OffT/Diff", diff, i)
+
+
+    online_q_mean = np.mean(online_q)
+    online_q_std = np.std(online_q)
+    offline_q_mean = np.mean(offline_q)
+    offline_q_std = np.std(offline_q)
+    offline_adv_mean = np.mean(offline_adv)
+    offline_adv_std = np.std(offline_adv)
+    for i in range(len(online_q)) :
+        online_q_normalized = (online_q[i] - online_q_mean) / online_q_std
+        writer.add_scalar("OffT/Online Q1",online_q_normalized,i)
+        offline_q_normalized = (offline_q[i] - offline_q_mean) / offline_q_std
+        writer.add_scalar("OffT/Offline Q1", offline_q_normalized, i)
+        offline_adv_normalized = (offline_adv[i] - offline_adv_mean) / offline_adv_std
+        writer.add_scalar("OffT/Offline Adv",offline_adv_normalized,i )
+        writer.add_scalar("OffT/Diff",online_q_normalized-offline_q_normalized,i)
+
+    online_q = []
+    offline_q = []
+    offline_adv = []
+    for i in range(len(online_agent.memory.memory)) :
+        st,at,_,_,_ = online_agent.memory.memory[i]
+
+        if i != 0 and i % 1 ==0 :
+            st = st.unsqueeze(0)
+            at = at.unsqueeze(0)
+            q, q1 = online_agent.critic1_network(st, at).item(), online_agent.critic2_network(st, at).item()
+            min_q = min(q, q1)
+            online_q.append(float(min_q))
+            # writer.add_scalar("OffT/Online Q1",min_q,i)
+            q2, q3 = offline_agent.critic_network_1(st, at), offline_agent.critic_network_2(st, at)
+            min_q2 = min(q2, q3)
+            offline_q.append(float(min_q2))
+            # writer.add_scalar("OffT/Offline Q1", min_q2, i)
+
+            v = offline_agent.value_network(st)
+            adv = min_q2 - v
+            offline_adv.append(float(adv))
+            # writer.add_scalar("OffT/Q-V",adv,i )
+            # writer.add_scalar("OffT/Diff", diff, i)
+
+    online_q_mean = np.mean(online_q)
+    online_q_std = np.std(online_q)
+    offline_q_mean = np.mean(offline_q)
+    offline_q_std = np.std(offline_q)
+    offline_adv_mean = np.mean(offline_adv)
+    offline_adv_std = np.std(offline_adv)
+    for i in range(len(online_q)):
+        online_q_normalized = (online_q[i] - online_q_mean) / online_q_std
+        writer.add_scalar("OnT/Online Q1", online_q_normalized, i)
+        offline_q_normalized = (offline_q[i] - offline_q_mean) / offline_q_std
+        writer.add_scalar("OnT/Offline Q1", offline_q_normalized, i)
+        offline_adv_normalized = (offline_adv[i] - offline_adv_mean) / offline_adv_std
+        writer.add_scalar("OnT/Offline Adv", offline_adv_normalized, i)
+        writer.add_scalar("OnT/Diff", online_q_normalized - offline_q_normalized, i)

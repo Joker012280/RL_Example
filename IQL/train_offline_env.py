@@ -21,7 +21,7 @@ hidden = 128
 
 ## Train
 total_reward = 0
-expectile = 0.5
+expectile = 0.7
 temperature = 3.0
 offline_agent = iql.IQL(state_dim,hidden,action_dim,expectile=expectile,temperature= temperature)
 list_total_reward = []
@@ -31,9 +31,9 @@ print("Finished Data Loading")
 print("Data size : ",offline_agent.memory.size())
 
 print("Start Training Offline Agent")
-max_offline_train_num = 300000
+max_offline_train_num = 100000
 print_interval = 2500
-iql_path = "IQL_3_0.5.pth"
+iql_path = "model_path/IQL_3_0.5.pth"
 load = True
 
 if load == True :
@@ -54,9 +54,7 @@ def testing():
         while not done:
             global_step += 1
             state = torch.FloatTensor(state)
-            with torch.no_grad():
-                action = offline_agent.actor_network(state)
-            action = action.sample()
+            action,_ = offline_agent.actor_network.evaluate(state)
 
             ## Action 값이 범위를 넘어서지 않도록 설정
             action = torch.clamp(action, min=-2, max=2)

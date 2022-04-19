@@ -2,8 +2,6 @@ import gym
 import math
 import random
 import numpy as np
-import matplotlib
-import matplotlib.pyplot as plt
 from itertools import count
 from IPython.display import clear_output
 import torch
@@ -166,7 +164,7 @@ for i_episode in range(num_episodes):
     if i_episode % 1000 == 0:
         clear_output()
 
-plotting.plot_durations(episode_durations,"Training.png")
+plotting.plot_durations(episode_durations, "Training.png")
 print('Train Complete')
 
 
@@ -200,7 +198,7 @@ for i_episode in range(num_episodes):
 
         # 다음 상태로 이동
         state = next_state
-plotting.plot_durations(results,"Online_Result.png")
+plotting.plot_durations(results, "Online_Result.png")
 print('Online Test Complete')
 
 clear_output()
@@ -242,5 +240,5 @@ for i_optimize in range(num_optimize):
                 # 다음 상태로 이동
                 state = next_state
 
-        plotting.plot_durations(results,"Offline_Result_" + str(test_num) + ".png")
+        plotting.plot_durations(results, "Offline_Result_" + str(test_num) + ".png")
 
