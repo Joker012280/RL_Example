@@ -3,12 +3,12 @@ import torch
 import numpy as np
 from matplotlib import pyplot as plt
 from IPython.display import clear_output
-import iql
+import iql2
 import os
 import sys
 
 from torch.utils.tensorboard import SummaryWriter
-writer = SummaryWriter()
+# writer = SummaryWriter()
 
 
 ## Environment
@@ -17,24 +17,24 @@ env = gym.make('Pendulum-v1')
 state_dim = env.observation_space.shape[0]
 action_dim = env.action_space.shape[0]
 max_action = float(env.action_space.high[0])
-hidden = 128
+hidden = 256
 
 ## Train
 total_reward = 0
 expectile = 0.7
 temperature = 3.0
-offline_agent = iql.IQL(state_dim,hidden,action_dim,expectile=expectile,temperature= temperature)
+offline_agent = iql2.IQL(state_dim,hidden,action_dim,expectile=expectile,temperature= temperature)
 list_total_reward = []
 
-offline_agent.memory.load_data()
+offline_agent.memory.load_data('online')
 print("Finished Data Loading")
 print("Data size : ",offline_agent.memory.size())
 
 print("Start Training Offline Agent")
-max_offline_train_num = 100000
-print_interval = 2500
-iql_path = "model_path/IQL_3_0.5.pth"
-load = True
+max_offline_train_num = 10000
+print_interval = 250
+iql_path = "IQL_Online.pth"
+load = False
 
 if load == True :
     temp = torch.load(iql_path)
@@ -59,7 +59,7 @@ def testing():
             ## Action 값이 범위를 넘어서지 않도록 설정
             action = torch.clamp(action, min=-2, max=2)
 
-            next_state, reward, done, _ = env.step(action.numpy())
+            next_state, reward, done, _ = env.step(action.detach().numpy())
             ## Replay Buffer의 저장
 
             state = next_state

@@ -19,7 +19,7 @@ hidden = 64
 
 ## Train
 total_reward = 0
-expectile = 0.7
+expectile = 0.9
 temperature = 10.0
 offline_agent = iql.IQL(state_dim,hidden,action_dim,expectile=expectile,temperature= temperature,is_discrete=True)
 list_total_reward = []

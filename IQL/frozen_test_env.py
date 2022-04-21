@@ -32,7 +32,7 @@ env = gym.make('FrozenLake-v1',desc = desc,map_name="4x4",is_slippery=False)
 state_dim = env.observation_space.n
 action_dim = env.action_space.n
 
-max_episode_num = 3
+max_episode_num = 10
 hidden = 64
 ## 결과값 프린트 주기
 print_interval = 1
@@ -43,7 +43,7 @@ online_agent = iql.IQL(state_dim,hidden,action_dim,is_discrete=True)
 list_total_reward = []
 
 temperature = 10.0
-expectile = 0.5
+expectile = 0.7
 
 
 ## 전에 사용했던 모델 있는 곳

@@ -3,19 +3,19 @@ import torch
 import numpy as np
 from matplotlib import pyplot as plt
 from IPython.display import clear_output
-import iql
+import iql2
 import os
 import sys
 
-path = (os.path.abspath(os.path.join((os.path.dirname(__file__)), '..')))
-sys.path.append(os.path.join(path, 'TD3'))
-import TD3
+# path = (os.path.abspath(os.path.join((os.path.dirname(__file__)), '..')))
+# sys.path.append(os.path.join(path, 'TD3'))
+# import TD3
 from torch.utils.tensorboard import SummaryWriter
 
 writer = SummaryWriter()
 
 
-def plot_durations(name, list1, list2,):
+def plot_durations(name, list1, list2):
     plt.figure(2)
     # plt.clf()
     durations_t = torch.FloatTensor(list1)
@@ -40,20 +40,19 @@ action_dim = env.action_space.shape[0]
 max_action = float(env.action_space.high[0])
 
 max_episode_num = 200
-hidden = 128
+hidden = 256
 ## 결과값 프린트 주기
 print_interval = 10
 
 ## Train
 total_reward = 0
-online_agent = TD3.TD3(state_dim, hidden, action_dim)
-noise_generator = TD3.Noisegenerator(0, 0.1)
-offline_agent = iql.IQL(state_dim, hidden, action_dim)
+online_agent = iql2.IQL(state_dim, hidden, action_dim)
+offline_agent = iql2.IQL(state_dim, hidden, action_dim)
 
 
 ## 전에 사용했던 모델 있는 곳
-td3_path = "Td3.pth"
-iql_path = "IQL_mid-expert_0.7.pth"
+td3_path = "IQL_Online.pth"
+iql_path = "IQL_3_0.7.pth"
 
 ## 전에 사용했던 모델 가져오기
 load = True
@@ -69,7 +68,7 @@ if load == True:
     print("End Loading")
 
 # First Test for TD3
-print("TD3 Testing")
+print("Online Testing")
 list_total_reward = []
 for num_episode in range(max_episode_num):
     state = env.reset()
@@ -79,17 +78,13 @@ for num_episode in range(max_episode_num):
     while not done:
         global_step += 1
         state = torch.from_numpy(state).float()
-        action = online_agent.actor_network(state).item()
+        action,_ = online_agent.actor_network.evaluate(state)
         ## noise 추가
-        action += noise_generator.generate()
 
         ## Action 값이 범위를 넘어서지 않도록 설정
-        action = max(min(action, 2.0), -2.0)
+        action = torch.clamp(action, min=-2, max=2)
 
-        next_state, reward, done, _ = env.step([action])
-        ## Replay Buffer의 저장
-        online_agent.memory.push((state, torch.FloatTensor([action]), torch.FloatTensor([reward]), \
-                                  torch.FloatTensor(np.array(next_state)), torch.FloatTensor([done])))
+        next_state, reward, done, _ = env.step(action.detach().numpy())
 
         state = next_state
 
@@ -141,6 +136,7 @@ for num_episode in range(max_episode_num):
         total_reward = 0.0
 
 print("IQL Testing")
+plot_durations("Final_test",list_total_reward,list_total_off_reward)
 
 
 # Checking Q values

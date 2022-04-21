@@ -1,5 +1,8 @@
 import gym
 import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+
 
 desc=["SFFF", "FFFF", "FFFF", "FFFG"]
 ## Environment
@@ -12,7 +15,7 @@ Q = np.zeros([state_dim,action_dim])
 
 learning_rate = 0.4
 discount_factor = 0.95
-num_episodes = 3000
+num_episodes = 5000
 
 list_total_reward = []
 
@@ -42,3 +45,7 @@ for i in range(action_dim) :
     print("For action : ",i)
     print(np.round(Q[:,i],4).reshape(4,4))
 
+x = np.arange(-0.5,3,1)
+y = np.round(Q[:,0],4).reshape(4,4)
+plt.pcolormesh(x,x,y)
+plt.savefig("Testing.png")
