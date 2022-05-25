@@ -31,6 +31,8 @@ class IQL(nn.Module):
             self.critic_target_network_2 = models.critic(state_dim + action_dim, hidden)
             self.critic_target_network_2.load_state_dict(self.critic_network_2.state_dict())
             self.value_network = models.value(state_dim, hidden)
+        self.state_dim = state_dim
+        self.action_dim = action_dim
         self.actor_lr = 0.003
         self.critic_lr = 0.003
         self.value_lr = 0.003
@@ -66,7 +68,9 @@ class IQL(nn.Module):
         samples = self.memory.sample()
         state, action, reward, next_state, done = zip(*samples)
         state = torch.cat(state)
+        state = state.reshape(-1, self.state_dim)
         next_state = torch.cat(next_state)
+        next_state = next_state.reshape(-1, self.state_dim)
         action = torch.cat(action)
         reward = torch.cat(reward)
         done = torch.cat(done)
@@ -146,10 +150,10 @@ class IQL(nn.Module):
             self.actor_optimizer.step()
 
             # Critic Update
-            q_1 = self.critic_network_1(state, action)
-            q_2 = self.critic_network_2(state, action)
+            q_1 = self.critic_network_1(state, action).squeeze()
+            q_2 = self.critic_network_2(state, action).squeeze()
             with torch.no_grad():
-                next_value = self.value_network(next_state)
+                next_value = self.value_network(next_state).squeeze()
                 q_target = reward + (self.discount_factor * next_value * (1 - done))
             critic_loss_1 = F.mse_loss(q_1, q_target)
             critic_loss_2 = F.mse_loss(q_2, q_target)

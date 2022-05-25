@@ -3,7 +3,7 @@ import torch
 import numpy as np
 from matplotlib import pyplot as plt
 from IPython.display import clear_output
-import iql2
+import iql
 import os
 import sys
 
@@ -23,7 +23,7 @@ hidden = 256
 total_reward = 0
 expectile = 0.7
 temperature = 3.0
-offline_agent = iql2.IQL(state_dim,hidden,action_dim,expectile=expectile,temperature= temperature)
+offline_agent = iql.IQL(state_dim,hidden,action_dim,expectile=expectile,temperature= temperature)
 list_total_reward = []
 
 offline_agent.memory.load_data('online')
@@ -31,8 +31,8 @@ print("Finished Data Loading")
 print("Data size : ",offline_agent.memory.size())
 
 print("Start Training Offline Agent")
-max_offline_train_num = 10000
-print_interval = 250
+max_offline_train_num = 30000
+print_interval = 500
 iql_path = "IQL_Online.pth"
 load = False
 

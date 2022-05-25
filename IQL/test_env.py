@@ -3,7 +3,7 @@ import torch
 import numpy as np
 from matplotlib import pyplot as plt
 from IPython.display import clear_output
-import iql2
+import iql
 import os
 import sys
 
@@ -46,8 +46,8 @@ print_interval = 10
 
 ## Train
 total_reward = 0
-online_agent = iql2.IQL(state_dim, hidden, action_dim)
-offline_agent = iql2.IQL(state_dim, hidden, action_dim)
+online_agent = iql.IQL(state_dim, hidden, action_dim)
+offline_agent = iql.IQL(state_dim, hidden, action_dim)
 
 
 ## 전에 사용했던 모델 있는 곳
@@ -104,7 +104,7 @@ for num_episode in range(max_episode_num):
 # Second Test for Crr
 print("IQL Testing")
 list_total_off_reward = []
-
+total_reward = 0
 for num_episode in range(max_episode_num):
     state = env.reset()
     global_step = 0
