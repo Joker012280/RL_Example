@@ -3,7 +3,7 @@ import torch
 import numpy as np
 from matplotlib import pyplot as plt
 from IPython.display import clear_output
-import cql
+import cds
 import os
 import sys
 

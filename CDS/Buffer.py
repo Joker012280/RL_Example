@@ -10,9 +10,6 @@ class Replay_buffer(object):
         self.batch_size = batch_size
         self.capacity = capacity
 
-
-
-
     def push(self, data):
         if self.capacity is not None :
             if len(self.memory) == self.capacity:

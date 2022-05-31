@@ -23,14 +23,21 @@ class actor(nn.Module):
         std = torch.exp(torch.clamp(log_std, self.log_std_min, self.log_std_max))
 
         return mean, std
-
+    
+    def get_action(self,x):
+        mean,std = self.forward(x)
+        std = std.exp()
+        action_dist = Normal(mean,std)
+        action = action_dist.rsample()
+        return action.detach()
+    
     def evaluate(self, x):
         mean, std = self.forward(x)
         action_dist = Normal(mean, std)
-        action = action_dist.rsample()
-
-        return action, action_dist
-
+        e = action_dist.rsample()
+        action = torch.tanh(e)
+        log_prob = (action_dist.log_prob(e)-torch.log(1-action.pow(2) + 1e-6)).sum(1,keepdim=True)
+        return action, log_prob
 
 class actor_discrete(nn.Module):
     def __init__(self, input_size, hidden, output_size):
@@ -50,7 +57,8 @@ class actor_discrete(nn.Module):
         logit = self.forward(x)
         dist = Categorical(logits=logit)
         action = dist.sample()
-        return action, dist
+        log_prob = (dist.log_prob(action)-torch.log(1-action.pow(2) + 1e-6)).sum(1,keepdim=True)
+        return action, log_prob
 
 
 class critic(nn.Module):
@@ -62,7 +70,7 @@ class critic(nn.Module):
         self.fc3 = nn.Linear(hidden, 1)
 
     def forward(self, x, y):
-        x = F.relu(self.fc1(torch.cat((x, y), dim=1)))
+        x = F.relu(self.fc1(torch.cat((x, y), dim=-1)))
         x = F.relu(self.fc2(x))
         x = self.fc3(x)
         return x
